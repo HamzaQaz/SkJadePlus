@@ -43,7 +43,7 @@ public class ExprGlowing extends SimplePropertyExpression<ItemStack, ItemStack> 
         if (itemStack.getType() == Material.BOW) {
             itemStack.addUnsafeEnchantment(Enchantment.RIPTIDE, 1);
         } else {
-            itemStack.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+            itemStack.addUnsafeEnchantment(Enchantment.INFINITY, 1);
         }
         ItemMeta meta = itemStack.getItemMeta();
         if (meta == null) return itemStack;

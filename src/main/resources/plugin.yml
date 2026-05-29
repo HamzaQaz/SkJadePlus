@@ -1,9 +1,9 @@
 name: SkJadePlus
-version: '${project.version}'
+version: '${version}'
 description: "§7Enhance §eSkript §7with this add-on and use custom syntax! §c❤"
 authors: [Ankoki, HamzaQaz]
 website: 'https://www.github.com/HamzaQaz/SkJadePlus'
-api-version: 1.16
+api-version: '1.21'
 main: com.ankoki.skjadeplus.SkJadePlus
 commands:
   skjadeplus:

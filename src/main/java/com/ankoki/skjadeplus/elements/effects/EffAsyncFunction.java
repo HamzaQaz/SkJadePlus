@@ -25,29 +25,22 @@ public class EffAsyncFunction extends Effect {
                 "run [[the] function] <(.+)>\\([<.*?>]\\) async");
     }*/
 
-    private EffFunctionCall functionCall;
+    // TODO(SkJadePlus): experimental async function-call effect. It was never registered (the static
+    // block above is commented out) and relied on the pre-2.x function API
+    // (ch.njol.skript.lang.function.FunctionReference / EffFunctionCall), whose wiring moved to
+    // org.skriptlang.skript.common.function in Skript 2.15. Left disabled pending a rewrite.
 
     @Override
     public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-        String unparsed = parseResult.regexes.get(0).group(0) + "(" + (parseResult.regexes.size() > 1 ? parseResult.regexes.get(1).group(0) : "") + ")";
-        FunctionReference<?> function = new SkriptParser(unparsed, SkriptParser.ALL_FLAGS, ParseContext.DEFAULT)
-                .parseFunction((Class<?>[]) null);
-        if (function == null) {
-            Skript.error("This isn't a valid function, or it doesn't exist!");
-            return false;
-        }
-        functionCall = new EffFunctionCall(function);
-        return true;
+        return false;
     }
 
     @Override
     protected void execute(Event e) {
-        if (functionCall == null) return;
-        Bukkit.getScheduler().runTaskAsynchronously(SkJadePlus.getInstance(), () -> functionCall.run(e));
     }
 
     @Override
     public String toString(@Nullable Event e, boolean debug) {
-        return "run " + functionCall.toString(e, debug) + " async";
+        return "run function async";
     }
 }
