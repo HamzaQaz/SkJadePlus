@@ -9,3 +9,7 @@
 /.gradle/
 /build/
 !gradle/wrapper/gradle-wrapper.jar
+
+# Local test servers (regenerable via .github/scripts/load-test.sh)
+/testserver/
+/run-test/

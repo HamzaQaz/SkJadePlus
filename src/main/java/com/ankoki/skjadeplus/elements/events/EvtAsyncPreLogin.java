@@ -7,10 +7,8 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.util.SimpleEvent;
 import ch.njol.skript.registrations.EventValues;
-import ch.njol.skript.util.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import org.eclipse.jdt.annotation.Nullable;
 
 import java.util.UUID;
 
@@ -23,20 +21,10 @@ public class EvtAsyncPreLogin extends SimpleEvent {
     static {
         Skript.registerEvent("Async PreLogin", EvtAsyncPreLogin.class, AsyncPlayerPreLoginEvent.class,
                 "[async] [player] pre( |-)login");
-        EventValues.registerEventValue(AsyncPlayerPreLoginEvent.class, UUID.class, new Getter<UUID, AsyncPlayerPreLoginEvent>() {
-            @Nullable
-            @Override
-            public UUID get(AsyncPlayerPreLoginEvent e) {
-                return e.getUniqueId();
-            }
-        }, 0);
-        EventValues.registerEventValue(AsyncPlayerPreLoginEvent.class, String.class, new Getter<String, AsyncPlayerPreLoginEvent>() {
-            @Nullable
-            @Override
-            public String get(AsyncPlayerPreLoginEvent e) {
-                return e.getName();
-            }
-        }, 0);
+        EventValues.registerEventValue(AsyncPlayerPreLoginEvent.class, UUID.class,
+                AsyncPlayerPreLoginEvent::getUniqueId, EventValues.TIME_NOW);
+        EventValues.registerEventValue(AsyncPlayerPreLoginEvent.class, String.class,
+                AsyncPlayerPreLoginEvent::getName, EventValues.TIME_NOW);
     }
 
     @Override

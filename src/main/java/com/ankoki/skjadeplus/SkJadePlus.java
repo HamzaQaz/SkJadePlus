@@ -5,7 +5,7 @@ import ch.njol.skript.SkriptAddon;
 import ch.njol.skript.classes.Changer;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.registrations.Classes;
-import ch.njol.skript.registrations.Converters;
+import org.skriptlang.skript.lang.converter.Converters;
 import ch.njol.util.coll.CollectionUtils;
 import com.ankoki.pastebinapi.api.PasteBuilder;
 import com.ankoki.skjadeplus.commands.SkJadeCmd;
