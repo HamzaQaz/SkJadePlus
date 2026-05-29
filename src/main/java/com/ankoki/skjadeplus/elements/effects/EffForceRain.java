@@ -9,33 +9,23 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
-import com.ankoki.skjadeplus.SkJadePlus;
-import com.ankoki.skjadeplus.utils.ReflectionUtils;
-import com.ankoki.skjadeplus.utils.Utils;
+import org.bukkit.WeatherType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Force Rain")
-@Description("Make it start/stop raining for players.")
+@Description("Make it start/stop raining for specific players (client-side per-player weather).")
 @Examples("make it stop raining for {queue::*}")
 @Since("1.1.0")
 public class EffForceRain extends Effect {
 
-    private static Class<?> packet;
-    private static Class<?> innerClass;
-    private static Object c, b;
     private Expression<Player> playerExpr;
     private boolean rain;
 
     static {
-        if (SkJadePlus.getInstance().isNmsEnabled()) {
-            Skript.registerEffect(EffForceRain.class,
-                    "((1¦force [it] to rain|force it to stop raining)|make it (1¦|stop) rain[ing]) for %players%");
-            packet = ReflectionUtils.getNMSClass("network.protocol.game",
-                    "PacketPlayOutGameStateChange");
-            innerClass = packet.getDeclaredClasses()[0];
-        }
+        Skript.registerEffect(EffForceRain.class,
+                "((1¦force [it] to rain|force it to stop raining)|make it (1¦|stop) rain[ing]) for %players%");
     }
 
     @Override
@@ -47,27 +37,10 @@ public class EffForceRain extends Effect {
 
     @Override
     protected void execute(Event e) {
-        if (playerExpr == null || Utils.getServerMajorVersion() < 16) return;
-        Player[] players = playerExpr.getArray(e);
-        if (c == null || b == null) {
-            try {
-                c = innerClass.getConstructor(int.class)
-                        .newInstance(2);
-                b = innerClass.getConstructor(int.class)
-                        .newInstance(1);
-            } catch (ReflectiveOperationException ex) {
-                ex.printStackTrace();
-                return;
-            }
-        }
-        try {
-            Object instance = packet.getConstructor(innerClass, float.class)
-                    .newInstance(rain ? c : b, 0F);
-            for (Player p : players) {
-                ReflectionUtils.sendPacket(p, instance);
-            }
-        } catch (ReflectiveOperationException ex) {
-            ex.printStackTrace();
+        if (playerExpr == null) return;
+        WeatherType type = rain ? WeatherType.DOWNFALL : WeatherType.CLEAR;
+        for (Player p : playerExpr.getArray(e)) {
+            p.setPlayerWeather(type);
         }
     }
 

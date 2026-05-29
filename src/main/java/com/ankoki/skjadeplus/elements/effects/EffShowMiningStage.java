@@ -9,9 +9,6 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
-import com.ankoki.skjadeplus.SkJadePlus;
-import com.ankoki.skjadeplus.utils.ReflectionUtils;
-import com.ankoki.skjadeplus.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,28 +16,21 @@ import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Show Mining Stage")
-@Description("Shows the block break animation/stage to players.")
+@Description({"Shows the block break animation/stage (0-9) to players at a location.",
+              "Optionally keyed to an entity id so multiple overlays can coexist on one block."})
 @Examples("show mining stage 5 at player's target block")
 @Since("1.2.0")
 public class EffShowMiningStage extends Effect {
 
-    private static Class<?> packet;
-    private static Class<?> blockPosition;
     private Expression<Number> stageExpr, entityId;
     private Expression<Location> location;
     private Expression<Player> playerExpr;
     private boolean remove = false;
 
     static {
-        if (SkJadePlus.getInstance().isNmsEnabled()) {
-            Skript.registerEffect(EffShowMiningStage.class,
-                    "(show|play) (mining|block break) (stage|animation) %number% at %locations% [to %-players%] [(1¦with [the] [entity] id %-number%|)]",
-                    "remove [the] (mining|block break) (stage|animation) at %locations% [for %-players%] [(1¦with [the] [entity] id %-number%|)]");
-            blockPosition = ReflectionUtils.getNMSClass("core",
-                    "BlockPosition");
-            packet = ReflectionUtils.getNMSClass("network.protocol.game",
-                    "PacketPlayOutBlockBreakAnimation");
-        }
+        Skript.registerEffect(EffShowMiningStage.class,
+                "(show|play) (mining|block break) (stage|animation) %number% at %locations% [to %-players%] [(1¦with [the] [entity] id %-number%|)]",
+                "remove [the] (mining|block break) (stage|animation) at %locations% [for %-players%] [(1¦with [the] [entity] id %-number%|)]");
     }
 
     @Override
@@ -78,7 +68,7 @@ public class EffShowMiningStage extends Effect {
             if (num == null) return;
             i = num.intValue();
         }
-        int ent = 0;
+        Integer ent = null;
         if (entityId != null) {
             Number num = entityId.getSingle(e);
             if (num == null) return;
@@ -87,24 +77,17 @@ public class EffShowMiningStage extends Effect {
         Location[] locs = location.getArray(e);
         Player[] players = playerExpr != null ? playerExpr.getArray(e) : Bukkit.getOnlinePlayers().toArray(new Player[0]);
         if (locs.length < 1) return;
-        int stage = Math.min(i, 9);
-        stage = Math.max(stage, 0);
-        if (remove) stage = 100;
-        for (Location location : locs) {
-            try {
-                Object position;
-                if (Utils.getServerMajorVersion() >= 19)
-                    position = blockPosition.getConstructor(int.class, int.class, int.class)
-                            .newInstance(location.getBlockX(), location.getBlockY(), location.getBlockZ());
-                else
-                    position = blockPosition.getConstructor(double.class, double.class, double.class)
-                        .newInstance(location.getX(), location.getY(), location.getZ());
-                Object instance = packet.getConstructor(int.class, blockPosition, int.class)
-                        .newInstance(ent, position, stage);
-                for (Player p : players)
-                    ReflectionUtils.sendPacket(p, instance);
-            } catch (ReflectiveOperationException ex) {
-                ex.printStackTrace();
+        // Bukkit/Paper sendBlockDamage takes progress in [0,1]; 0 removes the overlay.
+        // Map the legacy 0-9 stage onto that range (stage 9 = fully cracked).
+        int stage = Math.max(0, Math.min(9, i));
+        float progress = remove ? 0f : stage / 9.0f;
+        for (Location loc : locs) {
+            for (Player p : players) {
+                if (ent != null) {
+                    p.sendBlockDamage(loc, progress, ent);
+                } else {
+                    p.sendBlockDamage(loc, progress);
+                }
             }
         }
     }

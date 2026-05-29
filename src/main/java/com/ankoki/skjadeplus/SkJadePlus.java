@@ -9,7 +9,6 @@ import ch.njol.skript.registrations.Converters;
 import ch.njol.util.coll.CollectionUtils;
 import com.ankoki.pastebinapi.api.PasteBuilder;
 import com.ankoki.skjadeplus.commands.SkJadeCmd;
-import com.ankoki.skjadeplus.elements.lasers.Laser;
 import com.ankoki.skjadeplus.elements.pastebinapi.PasteManager;
 // TODO(Phase 5): re-enable once the hologram hook is rewritten onto DecentHolograms.
 // import com.ankoki.skjadeplus.hooks.holograms.HoloClassInfo;
@@ -41,7 +40,6 @@ public class SkJadePlus extends JavaPlugin {
     private String version;
     private PluginManager pluginManager;
     private SkriptAddon addon;
-    private boolean nmsEnabled = false;
     private boolean latest = true;
     private Config config = null;
     private final DecimalFormat df = new DecimalFormat("0.00");
@@ -59,7 +57,6 @@ public class SkJadePlus extends JavaPlugin {
         }
         config = new Config(this);
         addon = Skript.registerAddon(this);
-        this.loadNMS();
         this.loadClassInfo();
         if (Utils.getServerMajorVersion() > 12) {
             new NonLegacyClassInfo();
@@ -116,21 +113,6 @@ public class SkJadePlus extends JavaPlugin {
                 }
             }).start();
         }
-
-        if (Version.currentIsLegacy()) {
-            Console.warning("Please note SkJadePlus does not support legacy versions. The supported versions are 1.13+.");
-            Console.warning("You have no reason to not use the latest server version. SkJadePlus will still be enabled, " +
-                    "however you may encounter some issues which may not get fixed due to not supporting fossil versions.");
-        }
-    }
-
-    private void loadNMS() {
-        if (Version.currentIsLegacy() || Version.CURRENT_VERSION == Version.UNKNOWN) {
-            Console.warning("Could not find any NMS support for " + version + "! Please note SkJadePlus only supports " +
-                    "the latest sub-version of each version above 1.13.");
-            Console.warning("There is also a chance you are using a version I haven't implemented support for yet.");
-            Console.info("SkJadePlus will remain enabled, however anything using NMS will not be enabled!");
-        } else nmsEnabled = true;
     }
 
     private boolean isSkriptEnabled() {
@@ -153,8 +135,7 @@ public class SkJadePlus extends JavaPlugin {
                     "effects",
                     "events",
                     "conditions",
-                    "pastebinapi",
-                    "lasers");
+                    "pastebinapi");
         } catch (IOException ex) {
             Console.info("Something went horribly wrong!");
             ex.printStackTrace();
@@ -220,13 +201,6 @@ public class SkJadePlus extends JavaPlugin {
 
         Converters.registerConverter(Character.class, String.class, String::valueOf);
         Converters.registerConverter(Character.class, Integer.class, Character::getNumericValue);
-
-        //Laser ClassInfo
-        Classes.registerClass(new ClassInfo<>(Laser.class, "laser")
-                .user("laser?s?")
-                .name("Laser")
-                .description("A guardian beam.")
-                .since("1.3.1"));
     }
 
     private void startRealTime() {
@@ -243,10 +217,6 @@ public class SkJadePlus extends JavaPlugin {
 
     public static SkJadePlus getInstance() {
         return instance;
-    }
-
-    public boolean isNmsEnabled() {
-        return nmsEnabled;
     }
 
     public boolean isLatest() {

@@ -30,6 +30,7 @@ public class EffRefreshChunks extends AsyncEffect {
 
     @Override
     public boolean init(Expression<?>[] exprs, int i, Kleenean kleenean, ParseResult parseResult) {
+        chunks = (Expression<Chunk>) exprs[0];
         return true;
     }
 

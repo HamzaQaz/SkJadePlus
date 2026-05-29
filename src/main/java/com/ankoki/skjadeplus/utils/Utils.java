@@ -1,6 +1,6 @@
 package com.ankoki.skjadeplus.utils;
 
-import com.ankoki.skjadeplus.SkJadePlus;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
 
@@ -120,15 +120,20 @@ public final class Utils {
     }
 
     public static int getServerMajorVersion() {
-        int ver = 0;
+        // Works for both the legacy "1.X.Y" scheme and the new year-based scheme (e.g. "26.1.2").
+        // For 1.X it returns X (so historical ">= 16" / ">= 19" checks keep their meaning); for the
+        // year-based scheme it returns the leading number (always well past legacy). The old
+        // craftbukkit-package parse returned 0 on 1.20.5+ (package no longer versioned), which
+        // silently disabled version-gated syntax.
         try {
-            String packageName = SkJadePlus.getInstance().getServer().getClass().getPackage().getName();
-            String version = packageName.substring(packageName.lastIndexOf('.') + 1);
-            ver = Integer.parseInt(version.split("_")[1]);
+            String mc = Bukkit.getBukkitVersion().split("-")[0]; // e.g. "26.1.2" or "1.21.4"
+            String[] parts = mc.split("\\.");
+            int first = Integer.parseInt(parts[0]);
+            if (first == 1 && parts.length > 1) return Integer.parseInt(parts[1]);
+            return first;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            return 99; // unknown / newer format -> assume a modern server
         }
-        return ver;
     }
 
     public enum SpellType {

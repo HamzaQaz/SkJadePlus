@@ -56,6 +56,7 @@ sourceSets {
             exclude("com/ankoki/skjadeplus/hooks/holograms/**")   // Phase 5 (DecentHolograms)
             exclude("com/ankoki/skjadeplus/hooks/protocollib/**") // Phase 6 (ProtocolLib 26.1.2)
             exclude("com/ankoki/skjadeplus/hooks/elementals/**")  // blocked: Elementals abandoned, no 26.1.2 build
+            exclude("com/ankoki/skjadeplus/elements/lasers/**")   // deferred: hand-rolled NMS dead -> GuardianBeam (follow-up)
         }
     }
 }
