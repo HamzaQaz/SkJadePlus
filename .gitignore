@@ -3,4 +3,9 @@
 /target/
 /.idea/
 /dependency-reduced-pom.xml
-/SkJade.iml
+/SkJadePlus.iml
+
+# Gradle
+/.gradle/
+/build/
+!gradle/wrapper/gradle-wrapper.jar

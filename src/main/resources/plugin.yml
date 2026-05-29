@@ -1,13 +1,14 @@
-name: SkJade
+name: SkJadePlus
 version: '${project.version}'
 description: "§7Enhance §eSkript §7with this add-on and use custom syntax! §c❤"
-author: Ankoki
-website: 'https://www.github.com/Ankoki-Dev/SkJade'
+authors: [Ankoki, HamzaQaz]
+website: 'https://www.github.com/HamzaQaz/SkJadePlus'
 api-version: 1.16
-main: com.ankoki.skjade.SkJade
+main: com.ankoki.skjadeplus.SkJadePlus
 commands:
-  skjade:
-    description: Shows the version of SkJade that is currently being run.
+  skjadeplus:
+    description: Shows the version of SkJadePlus that is currently being run.
+    aliases: [skjade]
 depend:
   - Skript
 softdepend:
