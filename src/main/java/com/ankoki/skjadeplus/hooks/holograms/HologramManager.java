@@ -1,199 +1,133 @@
 package com.ankoki.skjadeplus.hooks.holograms;
 
-import com.ankoki.skjadeplus.SkJadePlus;
-import com.ankoki.skjadeplus.hooks.holograms.bukkitevents.HologramClickEvent;
-import com.ankoki.skjadeplus.hooks.holograms.bukkitevents.HologramTouchEvent;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-import com.gmail.filoghost.holographicdisplays.api.line.*;
-import org.bukkit.Bukkit;
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.DecentHologramsAPI;
+import eu.decentsoftware.holograms.api.actions.Action;
+import eu.decentsoftware.holograms.api.actions.ActionType;
+import eu.decentsoftware.holograms.api.actions.ClickType;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramLine;
+import eu.decentsoftware.holograms.api.holograms.HologramPage;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class HologramManager {
-    private static final Map<String, Hologram> ALL_HOLOGRAMS = new ConcurrentHashMap<>();
-    private static final Map<Hologram, List<HologramLine>> ALL_LINES = new ConcurrentHashMap<>();
-    private static final Map<HologramLine, Object> TEXT_LINES = new ConcurrentHashMap<>();
-    private static final Map<Hologram, Location> ALL_LOCATIONS = new ConcurrentHashMap<>();
+/**
+ * Thin wrapper around the DecentHolograms API (DHAPI).
+ *
+ * DecentHolograms keeps its own name-keyed registry, so holograms are looked up by their id
+ * (name) rather than a local map. DecentHolograms is paged (hologram -> pages -> lines);
+ * SkJadePlus uses single-page holograms, so line operations target page 0. Line numbers in this
+ * API are 1-based to match the SkJadePlus syntax.
+ */
+public final class HologramManager {
 
-    public static void createHologram(String key, Location location, boolean visibility, boolean allowPlaceholders) {
-        Hologram hologram = HologramsAPI.createHologram(SkJadePlus.getInstance(), location);
-        hologram.getVisibilityManager().setVisibleByDefault(visibility);
-        hologram.setAllowPlaceholders(allowPlaceholders);
-        ALL_HOLOGRAMS.put(key, hologram);
-        ALL_LOCATIONS.put(hologram, location);
+    private HologramManager() {}
+
+    public static Hologram createHologram(String key, Location location, boolean visible) {
+        Hologram hologram = DHAPI.createHologram(key, location);
+        hologram.setDefaultVisibleState(visible);
+        // DecentHolograms only fires HologramClickEvent for clickable pages, and a page is
+        // clickable only if it has at least one action. Register a no-op action for every click
+        // type so SkJadePlus holograms can be reacted to via the "on hologram click" event.
+        makeClickable(hologram);
+        return hologram;
+    }
+
+    public static void makeClickable(Hologram hologram) {
+        if (hologram == null) return;
+        for (int i = 0; i < hologram.size(); i++) {
+            HologramPage page = hologram.getPage(i);
+            if (page == null) continue;
+            for (ClickType type : ClickType.values()) {
+                page.addAction(type, new Action(ActionType.NONE, null));
+            }
+        }
     }
 
     public static void deleteHologram(Hologram... holograms) {
         for (Hologram hologram : holograms) {
-            ALL_HOLOGRAMS.entrySet().removeIf(entry -> entry.getValue().equals(hologram));
-            if (!hologram.isDeleted()) hologram.delete();
+            if (hologram != null) DHAPI.removeHologram(hologram.getName());
         }
+    }
+
+    public static void clearLines(Hologram hologram) {
+        if (hologram != null) DHAPI.setHologramLines(hologram, Collections.<String>emptyList());
     }
 
     public static void addTextLine(Hologram hologram, String line) {
-        List<HologramLine> lines = ALL_LINES.get(hologram);
-        if (lines == null) {
-            lines = new ArrayList<>();
-        }
-        HologramLine l = hologram.appendTextLine(line);
-        lines.add(l);
-        ALL_LINES.remove(hologram);
-        ALL_LINES.put(hologram, lines);
-        TEXT_LINES.put(l, line);
-        for (Map.Entry<String, Hologram> entry : ALL_HOLOGRAMS.entrySet()) {
-            if (entry.getValue() == hologram) {
-                ALL_HOLOGRAMS.remove(entry.getKey());
-                ALL_HOLOGRAMS.put(entry.getKey(), hologram);
-                return;
-            }
-        }
+        if (hologram != null) DHAPI.addHologramLine(hologram, line);
     }
 
     public static void addItemLine(Hologram hologram, ItemStack item) {
-        List<HologramLine> lines = ALL_LINES.get(hologram);
-        if (lines == null) {
-            lines = new ArrayList<>();
-        }
+        if (hologram == null || item == null) return;
         if (item.getAmount() > 64 || item.getAmount() < 1) return;
-        lines.add(hologram.appendItemLine(item));
-        ALL_LINES.remove(hologram);
-        ALL_LINES.put(hologram, lines);
-        for (Map.Entry<String, Hologram> entry : ALL_HOLOGRAMS.entrySet()) {
-            if (entry.getValue() == hologram) {
-                ALL_HOLOGRAMS.remove(entry.getKey());
-                ALL_HOLOGRAMS.put(entry.getKey(), hologram);
-                return;
-            }
-        }
+        DHAPI.addHologramLine(hologram, item);
     }
 
-    //not done
-    public static void setLine(Hologram hologram, int index, String text) {
-        if (!(hologram.getLine(index) instanceof TextLine)) return;
-        TextLine line = (TextLine) hologram.getLine(index);
-        line.setText(text);
-        for (Map.Entry<String, Hologram> entry : ALL_HOLOGRAMS.entrySet()) {
-            if (entry.getValue() == hologram) {
-                ALL_HOLOGRAMS.remove(entry.getKey());
-                ALL_HOLOGRAMS.put(entry.getKey(), hologram);
-                return;
-            }
-        }
+    public static void setLine(Hologram hologram, int line, String text) {
+        HologramLine l = getLine(hologram, line);
+        if (l != null) DHAPI.setHologramLine(l, text);
     }
 
     public static void removeLine(Hologram hologram, int line) {
-        line--;
-        if (line < 0) line = 0;
-        List<HologramLine> lines = ALL_LINES.get(hologram);
-        if (lines == null) {
-            lines = new ArrayList<>();
-        }
-        lines.remove(line);
-        HologramLine l = hologram.getLine(line);
-        hologram.removeLine(line);
-        ALL_LINES.remove(hologram);
-        ALL_LINES.put(hologram, lines);
-        TEXT_LINES.remove(l);
-        for (Map.Entry<String, Hologram> entry : ALL_HOLOGRAMS.entrySet()) {
-            if (entry.getValue() == hologram) {
-                ALL_HOLOGRAMS.remove(entry.getKey());
-                ALL_HOLOGRAMS.put(entry.getKey(), hologram);
-                return;
-            }
-        }
+        if (hologram == null) return;
+        HologramPage page = hologram.getPage(0);
+        if (page == null) return;
+        int index = Math.max(0, line - 1);
+        if (index >= page.getLines().size()) return;
+        DHAPI.removeHologramLine(page, index);
     }
 
     public static void removeLine(HologramLine line) {
-        Hologram hologram = line.getParent();
-        if (hologram == null) return;
-        List<HologramLine> lines = ALL_LINES.get(hologram);
-        if (lines == null) {
-            lines = new ArrayList<>();
-        }
-        lines.remove(line);
-        line.removeLine();
-        ALL_LINES.put(hologram, lines);
-        TEXT_LINES.remove(line);
-        for (Map.Entry<String, Hologram> entry : ALL_HOLOGRAMS.entrySet()) {
-            if (entry.getValue() == hologram) {
-                ALL_HOLOGRAMS.remove(entry.getKey());
-                ALL_HOLOGRAMS.put(entry.getKey(), hologram);
-                return;
-            }
-        }
+        if (line == null) return;
+        HologramPage page = line.getParent();
+        if (page == null) return;
+        int index = page.getLines().indexOf(line);
+        if (index >= 0) DHAPI.removeHologramLine(page, index);
     }
 
     public static HologramLine getLine(Hologram hologram, int line) {
         if (hologram == null) return null;
-        line--;
-        if (line < 0) line = 0;
-        List<HologramLine> lines = ALL_LINES.get(hologram);
-        if (lines == null) {
-            lines = new ArrayList<>();
-        }
-        return lines.get(line);
+        HologramPage page = hologram.getPage(0);
+        if (page == null) return null;
+        int index = Math.max(0, line - 1);
+        List<HologramLine> lines = page.getLines();
+        return index < lines.size() ? lines.get(index) : null;
     }
 
     public static HologramLine[] getLines(Hologram hologram) {
         if (hologram == null) return new HologramLine[0];
-        return ALL_LINES.get(hologram).toArray(new HologramLine[0]);
+        HologramPage page = hologram.getPage(0);
+        if (page == null) return new HologramLine[0];
+        return page.getLines().toArray(new HologramLine[0]);
+    }
+
+    /** 1-based index of a line within its hologram's page, or -1 if not found. */
+    public static int getLineIndex(HologramLine line) {
+        if (line == null) return -1;
+        HologramPage page = line.getParent();
+        if (page == null) return -1;
+        int idx = page.getLines().indexOf(line);
+        return idx < 0 ? -1 : idx + 1;
     }
 
     public static Hologram getHologram(String key) {
-        return ALL_HOLOGRAMS.get(key);
+        return DHAPI.getHologram(key);
+    }
+
+    public static Collection<Hologram> getAllHolograms() {
+        return DecentHologramsAPI.get().getHologramManager().getHolograms();
     }
 
     public static Location getHoloLocation(Hologram holo) {
-        return ALL_LOCATIONS.get(holo);
+        return holo == null ? null : holo.getLocation();
     }
 
     public static String getIDFromHolo(Hologram hologram) {
-        for (Map.Entry<String, Hologram> entry : ALL_HOLOGRAMS.entrySet()) {
-            if (entry.getValue() == hologram) {
-                return entry.getKey();
-            }
-        }
-        return "";
-    }
-
-    public static void handleTouch(Hologram hologram, HologramLine line) {
-        TouchableLine touchable = (TouchableLine) line;
-        if (touchable.getTouchHandler() == null) {
-            touchable.setTouchHandler(player -> {
-                HologramClickEvent event = new HologramClickEvent(player, hologram, touchable);
-                Bukkit.getPluginManager().callEvent(event);
-            });
-        }
-    }
-
-    public static void handlePickup(Hologram hologram, HologramLine line) {
-        if (!(line instanceof ItemLine)) return;
-        CollectableLine collectable = (CollectableLine) line;
-        if (collectable.getPickupHandler() == null) {
-            collectable.setPickupHandler(player -> {
-                HologramTouchEvent event = new HologramTouchEvent(player, hologram, collectable);
-                Bukkit.getPluginManager().callEvent(event);
-            });
-        }
-    }
-
-    public static void removeTouch(HologramLine line) {
-        ((TouchableLine) line).setTouchHandler(null);
-    }
-
-    public static void removePickup(HologramLine line) {
-        ((CollectableLine) line).setPickupHandler(null);
-    }
-
-    public enum TouchType {
-        INTERACTABLE,
-        CLICKABLE,
-        TOUCHABLE;
+        return hologram == null ? "" : hologram.getName();
     }
 }

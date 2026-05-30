@@ -30,8 +30,8 @@ dependencies {
     // Elementals — abandoned upstream (2021, MC 1.16/Java 8); no 26.1.2 build exists, so its hook
     // cannot load on 26.1.2. Hook source excluded below; revisit only if Elementals is ever updated.
     // compileOnly("com.github.Ankoki:Elementals:1.4")
-    // DecentHolograms — Phase 5 (hologram hook rewrite). Hook source excluded below until then.
-    // compileOnly("com.github.decentsoftware-eu:decentholograms:2.9.10")
+    // DecentHolograms — hologram hook (jitpack); 2.9.10 adds MC 26.1.2 support.
+    compileOnly("com.github.decentsoftware-eu:decentholograms:2.9.10")
 
     // Shaded into the plugin jar
     implementation("com.github.Ankoki:Pastebin-API:1.0")
@@ -53,7 +53,6 @@ java {
 sourceSets {
     main {
         java {
-            exclude("com/ankoki/skjadeplus/hooks/holograms/**")   // Phase 5 (DecentHolograms)
             exclude("com/ankoki/skjadeplus/hooks/protocollib/**") // Phase 6 (ProtocolLib 26.1.2)
             exclude("com/ankoki/skjadeplus/hooks/elementals/**")  // blocked: Elementals abandoned, no 26.1.2 build
             exclude("com/ankoki/skjadeplus/elements/lasers/**")   // deferred: hand-rolled NMS dead -> GuardianBeam (follow-up)

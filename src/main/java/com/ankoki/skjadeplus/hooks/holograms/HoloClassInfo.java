@@ -1,25 +1,17 @@
 package com.ankoki.skjadeplus.hooks.holograms;
 
-import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.classes.Changer;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.Parser;
-import ch.njol.skript.classes.Serializer;
 import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.registrations.Classes;
-import ch.njol.skript.registrations.Converters;
 import ch.njol.util.coll.CollectionUtils;
-import ch.njol.yggdrasil.Fields;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.line.HologramLine;
-import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
-import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramLine;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.eclipse.jdt.annotation.Nullable;
-
-import java.io.NotSerializableException;
-import java.io.StreamCorruptedException;
+import org.skriptlang.skript.lang.converter.Converters;
 
 public class HoloClassInfo {
 
@@ -28,7 +20,7 @@ public class HoloClassInfo {
             Classes.registerClass(new ClassInfo<>(Hologram.class, "hologram")
                     .user("holo(gram)?s?")
                     .name("Hologram")
-                    .description("A Hologram created with Holographic displays.")
+                    .description("A hologram created with DecentHolograms.")
                     .since("1.0.0")
                     .changer(new Changer<Hologram>() {
                         @Nullable
@@ -46,20 +38,16 @@ public class HoloClassInfo {
                                 HologramManager.deleteHologram(holograms);
                             } else if (mode == ChangeMode.ADD) {
                                 if (delta == null || delta[0] == null) return;
-                                if (delta[0] instanceof String) {
-                                    for (Hologram hologram : holograms) {
+                                for (Hologram hologram : holograms) {
+                                    if (delta[0] instanceof String) {
                                         HologramManager.addTextLine(hologram, (String) delta[0]);
-                                    }
-                                } else if (delta[0] instanceof ItemStack) {
-                                    for (Hologram hologram : holograms) {
+                                    } else if (delta[0] instanceof ItemStack) {
                                         HologramManager.addItemLine(hologram, (ItemStack) delta[0]);
                                     }
                                 }
-                            } else {
+                            } else { // RESET
                                 for (Hologram hologram : holograms) {
-                                    if (!hologram.isDeleted()) {
-                                        hologram.clearLines();
-                                    }
+                                    HologramManager.clearLines(hologram);
                                 }
                             }
                         }
@@ -72,40 +60,12 @@ public class HoloClassInfo {
 
                         @Override
                         public String toString(Hologram hologram, int i) {
-                            return "hologram";
+                            return "hologram " + hologram.getName();
                         }
 
                         @Override
                         public String toVariableNameString(Hologram hologram) {
-                            return "hologram:" + hologram.getCreationTimestamp();
-                        }
-                    })
-                    .serializer(new Serializer<Hologram>() {
-                        @Override
-                        public Fields serialize(Hologram hologram) throws NotSerializableException {
-                            Fields fields = new Fields();
-                            fields.putObject("id", HologramManager.getIDFromHolo(hologram));
-                            fields.putObject("location", HologramManager.getHoloLocation(hologram));
-                            fields.putObject("lines", HologramManager.getLines(hologram));
-
-                            return fields;
-                        }
-
-                        @Override
-                        public void deserialize(Hologram hologram, Fields fields) throws StreamCorruptedException, NotSerializableException {
-                            if (!hologram.isDeleted()) hologram.delete();
-                            HologramManager.createHologram((String) fields.getObject("id"),
-                                    (Location) fields.getObject("location"), true, true);
-                        }
-
-                        @Override
-                        public boolean mustSyncDeserialization() {
-                            return true;
-                        }
-
-                        @Override
-                        protected boolean canBeInstantiated() {
-                            return false;
+                            return "hologram:" + hologram.getName();
                         }
                     }));
 
@@ -114,7 +74,7 @@ public class HoloClassInfo {
             Classes.registerClass(new ClassInfo<>(HologramLine.class, "hologramline")
                     .user("holo(gram)?( |-)?lines?")
                     .name("Hologram Line")
-                    .description("A line of a Hologram.")
+                    .description("A line of a hologram.")
                     .since("1.0.0")
                     .changer(new Changer<HologramLine>() {
                         @Nullable
@@ -129,7 +89,7 @@ public class HoloClassInfo {
                         @Override
                         public void change(HologramLine[] hologramLines, @Nullable Object[] objects, ChangeMode mode) {
                             for (HologramLine line : hologramLines) {
-                                line.removeLine();
+                                HologramManager.removeLine(line);
                             }
                         }
                     })
@@ -141,24 +101,18 @@ public class HoloClassInfo {
 
                         @Override
                         public String toString(HologramLine hologramLine, int i) {
-                            return hologramLine instanceof ItemLine ? "hologram item line" : "hologram text line";
+                            return "hologram line";
                         }
 
                         @Override
                         public String toVariableNameString(HologramLine hologramLine) {
-                            return hologramLine instanceof ItemLine ? "hologram item line" : "hologram text line";
+                            return "hologram line";
                         }
                     }));
 
-            Converters.registerConverter(TextLine.class, String.class, TextLine::getText);
-            Converters.registerConverter(ItemLine.class, ItemType.class, line -> new ItemType(line.getItemStack()));
-            Converters.registerConverter(HologramLine.class, Number.class, line -> {
-                Hologram parent = line.getParent();
-                for (int i = 0; i < parent.size(); i++) {
-                    if (parent.getLine(i).equals(line)) return i++;
-                }
-                return null;
-            });
-        } catch(IllegalArgumentException ignored) {}
+            Converters.registerConverter(HologramLine.class, String.class, HologramLine::getContent);
+            Converters.registerConverter(HologramLine.class, Number.class, HologramManager::getLineIndex);
+        } catch (IllegalArgumentException ignored) {
+        }
     }
 }

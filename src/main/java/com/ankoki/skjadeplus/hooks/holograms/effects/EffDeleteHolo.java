@@ -7,14 +7,14 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Delete Hologram")
 @Description("Deletes a hologram")
 @Examples("delete the hologram with the id \"myHologram\"")
-@RequiredPlugins("HolographicDisplays")
+@RequiredPlugins("DecentHolograms")
 @Since("1.0.0")
 public class EffDeleteHolo extends Effect {
 
