@@ -1,0 +1,50 @@
+name: MC Compatibility
+
+# Boots a real headless Paper server for each Minecraft version in the matrix, with a
+# matching Skript build and the freshly built SkJadePlus jar, and asserts the plugin
+# enables cleanly. This is the "tests across Java and Minecraft versions" gate.
+
+on:
+  push:
+    branches: [ master, "modernize/**" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Each Minecraft version is pinned to the Java it requires. Extend this list as
+          # new Paper/Skript builds become available (e.g. future 26.x drops).
+          - minecraft: "26.1.2"
+            java: "25"
+            skript: "2.15.2"
+    name: Load on MC ${{ matrix.minecraft }} (JDK ${{ matrix.java }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build plugin (shadowJar)
+        run: ./gradlew shadowJar --stacktrace --no-daemon
+
+      - name: Boot Paper ${{ matrix.minecraft }} + Skript ${{ matrix.skript }} and assert load
+        run: ./.github/scripts/load-test.sh "${{ matrix.minecraft }}" "${{ matrix.skript }}"
+
+      - name: Upload server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-log-mc${{ matrix.minecraft }}
+          path: run-test/server.log
+          if-no-files-found: ignore
