@@ -10,8 +10,7 @@ import ch.njol.util.coll.CollectionUtils;
 import com.ankoki.pastebinapi.api.PasteBuilder;
 import com.ankoki.skjadeplus.commands.SkJadeCmd;
 import com.ankoki.skjadeplus.elements.pastebinapi.PasteManager;
-// TODO(Phase 5): re-enable once the hologram hook is rewritten onto DecentHolograms.
-// import com.ankoki.skjadeplus.hooks.holograms.HoloClassInfo;
+import com.ankoki.skjadeplus.hooks.holograms.HoloClassInfo;
 import com.ankoki.skjadeplus.listeners.PlayerJoin;
 import com.ankoki.skjadeplus.utils.*;
 import com.ankoki.skjadeplus.utils.events.RealTimeEvent;
@@ -72,6 +71,15 @@ public class SkJadePlus extends JavaPlugin {
         //     Console.info("HolographicDisplays was found! Enabling support");
         //     this.loadHDElements();
         // }
+        // TODO(Phase 6): ProtocolLib hook disabled until a 26.1.2-compatible ProtocolLib is wired.
+        // if (isPluginEnabled("ProtocolLib") && Config.PROTOCOL_LIB_ENABLED) {
+        //     Console.info("ProtocolLib was found! Enabling support");
+        //     this.loadProtocolElements();
+        // }
+        if (isPluginEnabled("DecentHolograms") && Config.HOLOGRAPHIC_DISPLAYS_ENABLED) {
+            Console.info("DecentHolograms was found! Enabling hologram support.");
+            this.loadHDElements();
+        }
         // Elementals hook disabled: upstream Elementals is abandoned (no 26.1.2 build), so it can
         // never be present at runtime on this server version. Re-enable only if Elementals is updated.
         // if (isPluginEnabled("Elementals") && Config.ELEMENTALS_ENABLED) {
@@ -141,10 +149,14 @@ public class SkJadePlus extends JavaPlugin {
         }
     }
 
-    // TODO(Phase 5): re-implement against DecentHolograms (DHAPI + HologramClickEvent).
     private void loadHDElements() {
-        // new HoloClassInfo();
-        // addon.loadClasses("com.ankoki.skjadeplus.hooks.holograms");
+        try {
+            new HoloClassInfo();
+            addon.loadClasses("com.ankoki.skjadeplus.hooks.holograms");
+        } catch (IOException ex) {
+            Console.info("Something went horribly wrong enabling hologram support!");
+            ex.printStackTrace();
+        }
     }
 
     // Disabled: Elementals is abandoned upstream with no 26.1.2 build (see onEnable).

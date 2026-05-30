@@ -7,9 +7,8 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
-import com.ankoki.skjadeplus.SkJadePlus;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -18,7 +17,7 @@ import java.util.Collection;
 @Name("All Holograms")
 @Description("Returns all holograms created by SkJadePlus.")
 @Examples("delete all skjade holograms")
-@RequiredPlugins("Holographic Displays")
+@RequiredPlugins("DecentHolograms")
 @Since("1.2.0")
 public class ExprAllHolograms extends SimpleExpression<Hologram> {
 
@@ -35,7 +34,7 @@ public class ExprAllHolograms extends SimpleExpression<Hologram> {
     @Nullable
     @Override
     protected Hologram[] get(Event e) {
-        Collection<Hologram> all = HologramsAPI.getHolograms(SkJadePlus.getInstance());
+        Collection<Hologram> all = HologramManager.getAllHolograms();
         return all.toArray(new Hologram[0]);
     }
 

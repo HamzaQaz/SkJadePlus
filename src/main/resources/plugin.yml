@@ -12,7 +12,5 @@ commands:
 depend:
   - Skript
 softdepend:
-  - HolographicDisplays
-  - Citizens
-  - Elementals
+  - DecentHolograms
   - ProtocolLib
