@@ -50,13 +50,11 @@ java {
     }
 }
 
-// TEMP (Phase 5): the hologram hook still targets the dead HolographicDisplays v2 API
-// (com.gmail.filoghost.*). It is excluded from compilation until rewritten onto DecentHolograms.
+// Hooks excluded from compilation until their upstreams support MC 26.1.2. The hologram
+// (DecentHolograms) and ProtocolLib hooks ARE compiled now — their dependencies are wired above.
 sourceSets {
     main {
         java {
-            exclude("com/ankoki/skjadeplus/hooks/holograms/**")   // Phase 5 (DecentHolograms)
-            exclude("com/ankoki/skjadeplus/hooks/protocollib/**") // Phase 6 (ProtocolLib 26.1.2)
             exclude("com/ankoki/skjadeplus/hooks/elementals/**")  // blocked: Elementals abandoned, no 26.1.2 build
             exclude("com/ankoki/skjadeplus/elements/lasers/**")   // deferred: hand-rolled NMS dead -> GuardianBeam (follow-up)
         }
