@@ -25,8 +25,10 @@ dependencies {
     compileOnly("com.github.SkriptLang:Skript:2.15.2")
 
     // Soft-dependency hooks (provided by their own plugins at runtime)
-    // ProtocolLib — Phase 6. No stable 26.1.2 build; coord/repo TBD. Hook source excluded below until then.
-    // compileOnly("net.dmulloy2:ProtocolLib:5.5.0-SNAPSHOT")
+    // ProtocolLib: vendored dev-build jar (5.5.0-SNAPSHOT) — the only artifact with MC 26.1.2
+    // support. The Maven snapshot (5.4.0) lacks 26.1.2 and the JitPack build fails on Java 25.
+    // Revisit when a stable 5.5.0 reaches Maven Central (net.dmulloy2:ProtocolLib).
+    compileOnly(files("libs/ProtocolLib-5.5.0-SNAPSHOT-devbuild-20260512.jar"))
     // Elementals — abandoned upstream (2021, MC 1.16/Java 8); no 26.1.2 build exists, so its hook
     // cannot load on 26.1.2. Hook source excluded below; revisit only if Elementals is ever updated.
     // compileOnly("com.github.Ankoki:Elementals:1.4")
@@ -53,7 +55,6 @@ java {
 sourceSets {
     main {
         java {
-            exclude("com/ankoki/skjadeplus/hooks/protocollib/**") // Phase 6 (ProtocolLib 26.1.2)
             exclude("com/ankoki/skjadeplus/hooks/elementals/**")  // blocked: Elementals abandoned, no 26.1.2 build
             exclude("com/ankoki/skjadeplus/elements/lasers/**")   // deferred: hand-rolled NMS dead -> GuardianBeam (follow-up)
         }
