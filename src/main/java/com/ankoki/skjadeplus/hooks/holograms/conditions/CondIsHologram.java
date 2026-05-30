@@ -6,38 +6,45 @@ import ch.njol.skript.lang.Condition;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-import org.bukkit.entity.Entity;
+import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Is A Hologram")
-@Description("Checks if an entity is a hologram")
-@Examples("if event-entity is a hd hologram:")
-@RequiredPlugins("HolographicDisplays")
+@Description("Checks if a value is a hologram, either a hologram object or the id/name of an existing hologram.")
+@Examples("if {_holo} is a hologram:")
+@RequiredPlugins("DecentHolograms")
 @Since("1.0.0")
 public class CondIsHologram extends Condition {
 
     static {
         Skript.registerCondition(CondIsHologram.class,
-                "%entity% is a [(hd|holographic displays)] hologram");
+                "%object% is a [(hd|holographic displays|decent[ ]holograms)] hologram");
     }
 
-    private Expression<Entity> entity;
+    private Expression<?> object;
 
     @Override
     public boolean init(Expression<?>[] exprs, int i, Kleenean kleenean, ParseResult parseResult) {
-        entity = (Expression<Entity>) exprs[0];
+        object = exprs[0];
         return true;
     }
 
     @Override
     public boolean check(Event event) {
-        return HologramsAPI.isHologramEntity(entity.getSingle(event));
+        Object value = object.getSingle(event);
+        if (value == null)
+            return false;
+        if (value instanceof Hologram)
+            return true;
+        if (value instanceof String)
+            return HologramManager.getHologram((String) value) != null;
+        return false;
     }
 
     @Override
     public String toString(@Nullable Event event, boolean b) {
-        return entity.toString(event, b) + " is a hologram";
+        return object.toString(event, b) + " is a hologram";
     }
 }
