@@ -38,6 +38,8 @@ dependencies {
     // Shaded into the plugin jar
     implementation("com.github.Ankoki:Pastebin-API:1.0")
     implementation("org.bstats:bstats-bukkit:3.1.0")
+    // GuardianBeam (laser/guardian-beam util) — 2.4.7 adds MC 26.1 support; Maven Central.
+    implementation("fr.skytasul:guardianbeam:2.4.7")
 
     // Annotations (compile-time only)
     compileOnly("org.jetbrains:annotations:26.0.2")
@@ -56,7 +58,6 @@ sourceSets {
     main {
         java {
             exclude("com/ankoki/skjadeplus/hooks/elementals/**")  // blocked: Elementals abandoned, no 26.1.2 build
-            exclude("com/ankoki/skjadeplus/elements/lasers/**")   // deferred: hand-rolled NMS dead -> GuardianBeam (follow-up)
         }
     }
 }
@@ -76,6 +77,7 @@ tasks {
     shadowJar {
         archiveClassifier.set("")
         relocate("org.bstats", "com.ankoki.skjadeplus.libs.metrics")
+        relocate("fr.skytasul", "com.ankoki.skjadeplus.libs.skytasul")
     }
     build {
         dependsOn(shadowJar)

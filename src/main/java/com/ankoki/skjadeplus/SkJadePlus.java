@@ -11,6 +11,7 @@ import com.ankoki.pastebinapi.api.PasteBuilder;
 import com.ankoki.skjadeplus.commands.SkJadeCmd;
 import com.ankoki.skjadeplus.elements.pastebinapi.PasteManager;
 import com.ankoki.skjadeplus.hooks.holograms.HoloClassInfo;
+import fr.skytasul.guardianbeam.Laser;
 import com.ankoki.skjadeplus.listeners.PlayerJoin;
 import com.ankoki.skjadeplus.utils.*;
 import com.ankoki.skjadeplus.utils.events.RealTimeEvent;
@@ -132,7 +133,8 @@ public class SkJadePlus extends JavaPlugin {
                     "effects",
                     "events",
                     "conditions",
-                    "pastebinapi");
+                    "pastebinapi",
+                    "lasers");
         } catch (IOException ex) {
             Console.info("Something went horribly wrong!");
             ex.printStackTrace();
@@ -206,6 +208,13 @@ public class SkJadePlus extends JavaPlugin {
 
         Converters.registerConverter(Character.class, String.class, String::valueOf);
         Converters.registerConverter(Character.class, Integer.class, Character::getNumericValue);
+
+        //Laser ClassInfo (backed by the shaded GuardianBeam util)
+        Classes.registerClass(new ClassInfo<>(Laser.class, "laser")
+                .user("laser?s?")
+                .name("Laser")
+                .description("A guardian beam.")
+                .since("1.3.1"));
     }
 
     private void startRealTime() {
