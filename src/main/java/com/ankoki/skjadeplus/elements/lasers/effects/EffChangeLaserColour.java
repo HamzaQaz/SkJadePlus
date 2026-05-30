@@ -10,7 +10,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.SkJadePlus;
-import com.ankoki.skjadeplus.elements.lasers.Laser;
+import fr.skytasul.guardianbeam.Laser;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.Nullable;
 public class EffChangeLaserColour extends Effect {
 
     static {
-        if (SkJadePlus.getInstance().isNmsEnabled())
             Skript.registerEffect(EffChangeLaserColour.class,
                 "(force|make) %lasers% [to] change colo[u]r[[']s]");
     }

@@ -11,7 +11,7 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.util.Timespan;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.SkJadePlus;
-import com.ankoki.skjadeplus.elements.lasers.Laser;
+import fr.skytasul.guardianbeam.Laser;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.Nullable;
 public class EffShowLaser extends Effect {
 
     static {
-        if (SkJadePlus.getInstance().isNmsEnabled())
             Skript.registerEffect(EffShowLaser.class,
                 "show [a] [new] (la(s|z)er [beam]|guardian beam) from %location% to %location% for %timespan% [for %-players%]");
     }
@@ -55,7 +54,7 @@ public class EffShowLaser extends Effect {
         int seconds = (int) Math.ceil(sec.getTicks_i() / 20D);
         try {
             Laser laser = new Laser.GuardianLaser(loc1, loc2, seconds, 100);
-            laser.start(SkJadePlus.getInstance(), players);
+            laser.start(SkJadePlus.getInstance());
         } catch (ReflectiveOperationException ignore) {}
     }
 
