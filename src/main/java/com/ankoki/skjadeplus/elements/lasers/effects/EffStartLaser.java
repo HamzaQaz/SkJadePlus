@@ -10,7 +10,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.SkJadePlus;
-import com.ankoki.skjadeplus.elements.lasers.Laser;
+import fr.skytasul.guardianbeam.Laser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.Nullable;
 public class EffStartLaser extends Effect {
 
     static {
-        if (SkJadePlus.getInstance().isNmsEnabled())
             Skript.registerEffect(EffStartLaser.class,
                 "start %laser% [for %-players%]");
     }
@@ -48,7 +47,7 @@ public class EffStartLaser extends Effect {
         } else {
             players = playerExpr.getArray(e);
         }
-        laser.start(SkJadePlus.getInstance(), players);
+        laser.start(SkJadePlus.getInstance());
     }
 
     @Override
