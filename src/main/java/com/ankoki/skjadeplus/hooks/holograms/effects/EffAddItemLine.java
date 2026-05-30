@@ -7,7 +7,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.eclipse.jdt.annotation.Nullable;
@@ -15,7 +15,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @Name("Add Item Line")
 @Description("Adds an item to the hologram.")
 @Examples("add glowing diamond to the hologram with id \"testHolo\"")
-@RequiredPlugins("HolographicDisplays")
+@RequiredPlugins("DecentHolograms")
 @Since("1.0.0")
 public class EffAddItemLine extends Effect {
 

@@ -9,17 +9,16 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
-import com.gmail.filoghost.holographicdisplays.api.line.HologramLine;
-import com.gmail.filoghost.holographicdisplays.api.line.ItemLine;
-import com.gmail.filoghost.holographicdisplays.api.line.TextLine;
+import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.HologramLine;
 import org.bukkit.event.Event;
-import org.bukkit.inventory.ItemStack;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Contents of Hologram Line")
-@Description("Returns the text of a hologram line, or an itemstack.")
+@Description("Returns the text of a hologram line.")
 @Examples("broadcast content of event-line")
-@RequiredPlugins("HolographicDisplays")
+@RequiredPlugins("DecentHolograms")
 @Since("1.3.1")
 public class ExprHologramLineContents extends SimpleExpression<Object> {
 
@@ -40,12 +39,8 @@ public class ExprHologramLineContents extends SimpleExpression<Object> {
     @Override
     protected Object[] get(Event e) {
         HologramLine line = lineExpr.getSingle(e);
-        if (line instanceof TextLine) {
-            return new Object[]{((TextLine) line).getText()};
-        } else if (line instanceof ItemLine) {
-            return new Object[]{((ItemLine) line).getItemStack()};
-        }
-        return new Object[0];
+        if (line == null) return new Object[0];
+        return new Object[]{line.getContent()};
     }
 
     @Override
@@ -67,7 +62,7 @@ public class ExprHologramLineContents extends SimpleExpression<Object> {
     @Override
     public Class<?>[] acceptChange(ChangeMode mode) {
         if (mode == ChangeMode.SET) {
-            return CollectionUtils.array(String.class, ItemStack.class);
+            return CollectionUtils.array(String.class);
         }
         return null;
     }
@@ -75,17 +70,11 @@ public class ExprHologramLineContents extends SimpleExpression<Object> {
     @Override
     public void change(Event e, @Nullable Object[] delta, ChangeMode mode) {
         assert mode == ChangeMode.SET;
-        if (delta.length < 1 || delta[0] == null || lineExpr == null) return;
+        if (delta == null || delta.length < 1 || delta[0] == null || lineExpr == null) return;
         HologramLine line = lineExpr.getSingle(e);
         if (line == null) return;
-        if (line instanceof TextLine) {
-            Object obj = delta[0];
-            if (!(obj instanceof String)) return;
-            ((TextLine) line).setText((String) obj);
-        } else if (line instanceof ItemLine) {
-            Object obj = delta[0];
-            if (!(obj instanceof ItemStack)) return;
-            ((ItemLine) line).setItemStack((ItemStack) obj);
-        }
+        Object obj = delta[0];
+        if (!(obj instanceof String)) return;
+        DHAPI.setHologramLine(line, (String) obj);
     }
 }

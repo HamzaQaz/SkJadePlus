@@ -9,7 +9,8 @@ import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
@@ -43,7 +44,7 @@ public class EffTeleportHolo extends Effect {
 		Location location = locationExpr.getSingle(event);
 		if (location == null)
 			return;
-		Arrays.stream(holograms).forEach(holo -> holo.teleport(location));
+		Arrays.stream(holograms).forEach(holo -> DHAPI.moveHologram(holo, location));
 	}
 
 	@Override

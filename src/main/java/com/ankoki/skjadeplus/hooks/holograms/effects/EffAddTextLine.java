@@ -7,7 +7,7 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -16,7 +16,7 @@ import java.util.Arrays;
 @Name("Add Text Line")
 @Description("Adds a line of text to the hologram.")
 @Examples("add line \"This is a hologram!\" to the hologram with id \"testHolo\"")
-@RequiredPlugins("HolographicDisplays")
+@RequiredPlugins("DecentHolograms")
 @Since("1.0.0")
 public class EffAddTextLine extends Effect {
 
