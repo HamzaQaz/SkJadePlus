@@ -7,15 +7,15 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.hooks.holograms.HologramManager;
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.line.HologramLine;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import eu.decentsoftware.holograms.api.holograms.HologramLine;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
 @Name("Remove Line")
 @Description("Removes a line from a hologram")
 @Examples("remove line number 3 from the hologram with id \"testHolo\"")
-@RequiredPlugins("HolographicDisplays")
+@RequiredPlugins("DecentHolograms")
 @Since("1.0.0")
 public class EffRemoveLine extends Effect {
 

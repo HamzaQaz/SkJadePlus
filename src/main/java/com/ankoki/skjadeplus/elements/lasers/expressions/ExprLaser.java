@@ -12,7 +12,7 @@ import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import com.ankoki.skjadeplus.SkJadePlus;
 import com.ankoki.skjadeplus.elements.lasers.LaserManager;
-import com.ankoki.skjadeplus.elements.lasers.Laser;
+import fr.skytasul.guardianbeam.Laser;
 import org.bukkit.event.Event;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
 public class ExprLaser extends SimpleExpression<Laser> {
 
     static {
-        if (SkJadePlus.getInstance().isNmsEnabled())
             Skript.registerExpression(ExprLaser.class, Laser.class, ExpressionType.SIMPLE,
                 "[the] (la(s|z)er [beam]|guardian beam) with [the] id %string%");
     }

@@ -25,17 +25,21 @@ dependencies {
     compileOnly("com.github.SkriptLang:Skript:2.15.2")
 
     // Soft-dependency hooks (provided by their own plugins at runtime)
-    // ProtocolLib — Phase 6. No stable 26.1.2 build; coord/repo TBD. Hook source excluded below until then.
-    // compileOnly("net.dmulloy2:ProtocolLib:5.5.0-SNAPSHOT")
+    // ProtocolLib: vendored dev-build jar (5.5.0-SNAPSHOT) — the only artifact with MC 26.1.2
+    // support. The Maven snapshot (5.4.0) lacks 26.1.2 and the JitPack build fails on Java 25.
+    // Revisit when a stable 5.5.0 reaches Maven Central (net.dmulloy2:ProtocolLib).
+    compileOnly(files("libs/ProtocolLib-5.5.0-SNAPSHOT-devbuild-20260512.jar"))
     // Elementals — abandoned upstream (2021, MC 1.16/Java 8); no 26.1.2 build exists, so its hook
     // cannot load on 26.1.2. Hook source excluded below; revisit only if Elementals is ever updated.
     // compileOnly("com.github.Ankoki:Elementals:1.4")
-    // DecentHolograms — Phase 5 (hologram hook rewrite). Hook source excluded below until then.
-    // compileOnly("com.github.decentsoftware-eu:decentholograms:2.9.10")
+    // DecentHolograms — hologram hook (jitpack); 2.9.10 adds MC 26.1.2 support.
+    compileOnly("com.github.decentsoftware-eu:decentholograms:2.9.10")
 
     // Shaded into the plugin jar
     implementation("com.github.Ankoki:Pastebin-API:1.0")
     implementation("org.bstats:bstats-bukkit:3.1.0")
+    // GuardianBeam (laser/guardian-beam util) — 2.4.7 adds MC 26.1 support; Maven Central.
+    implementation("fr.skytasul:guardianbeam:2.4.7")
 
     // Annotations (compile-time only)
     compileOnly("org.jetbrains:annotations:26.0.2")
@@ -53,10 +57,7 @@ java {
 sourceSets {
     main {
         java {
-            exclude("com/ankoki/skjadeplus/hooks/holograms/**")   // Phase 5 (DecentHolograms)
-            exclude("com/ankoki/skjadeplus/hooks/protocollib/**") // Phase 6 (ProtocolLib 26.1.2)
             exclude("com/ankoki/skjadeplus/hooks/elementals/**")  // blocked: Elementals abandoned, no 26.1.2 build
-            exclude("com/ankoki/skjadeplus/elements/lasers/**")   // deferred: hand-rolled NMS dead -> GuardianBeam (follow-up)
         }
     }
 }
@@ -76,6 +77,7 @@ tasks {
     shadowJar {
         archiveClassifier.set("")
         relocate("org.bstats", "com.ankoki.skjadeplus.libs.metrics")
+        relocate("fr.skytasul", "com.ankoki.skjadeplus.libs.skytasul")
     }
     build {
         dependsOn(shadowJar)

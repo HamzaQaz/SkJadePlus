@@ -1,5 +1,7 @@
 package com.ankoki.skjadeplus.elements.lasers;
 
+import fr.skytasul.guardianbeam.Laser;
+
 import java.util.HashMap;
 import java.util.Map;
 
