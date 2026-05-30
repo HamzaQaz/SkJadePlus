@@ -62,6 +62,15 @@ public class SkJadePlus extends JavaPlugin {
         }
 
         this.loadElements();
+        if (isPluginEnabled("ProtocolLib") && Config.PROTOCOL_LIB_ENABLED) {
+            Console.info("ProtocolLib was found! Enabling support.");
+            this.loadProtocolElements();
+        }
+        // TODO(Phase 5): hologram hook is being rewritten onto DecentHolograms; disabled for now.
+        // if (isPluginEnabled("HolographicDisplays") && Config.HOLOGRAPHIC_DISPLAYS_ENABLED) {
+        //     Console.info("HolographicDisplays was found! Enabling support");
+        //     this.loadHDElements();
+        // }
         // TODO(Phase 6): ProtocolLib hook disabled until a 26.1.2-compatible ProtocolLib is wired.
         // if (isPluginEnabled("ProtocolLib") && Config.PROTOCOL_LIB_ENABLED) {
         //     Console.info("ProtocolLib was found! Enabling support");
@@ -155,9 +164,13 @@ public class SkJadePlus extends JavaPlugin {
         // addon.loadClasses("com.ankoki.skjadeplus.hooks.elementals");
     }
 
-    // TODO(Phase 6): re-enable once a 26.1.2-compatible ProtocolLib is wired.
     private void loadProtocolElements() {
-        // addon.loadClasses("com.ankoki.skjadeplus.hooks.protocollib");
+        try {
+            addon.loadClasses("com.ankoki.skjadeplus.hooks.protocollib");
+        } catch (IOException ex) {
+            Console.info("Something went horribly wrong enabling ProtocolLib support!");
+            ex.printStackTrace();
+        }
     }
 
     private void registerListeners(Listener... listeners) {
